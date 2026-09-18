@@ -2,10 +2,12 @@
 
 An AI-powered resume tailoring system that reads a job description, retrieves grounded evidence from a personal knowledge base using RAG, and generates a targeted resume. Every bullet is backed by real experience or projects, so it tailors without fabricating.
 
+The project has two parts: a **FastAPI backend** that runs the AI pipeline, and a **Next.js frontend** for using it in the browser.
+
 ## How it works
- 
+
 ResumeTailor runs a multi-stage pipeline:
- 
+
 ```
 Job Description
       │
@@ -55,8 +57,8 @@ A retrieved evidence item looks like this:
   "category": "ai_ml",
   "priority": "required",
   "document_type": "professional_experience",
-  "source": "experience1",
-  "organization": "Company name",
+  "source": "ai_trusted_advisors",
+  "organization": "AI Trusted Advisors",
   "role": "AI Engineer",
   "content": "..."
 }
@@ -64,44 +66,66 @@ A retrieved evidence item looks like this:
 
 ## Tech stack
 
-- **Python** with **FastAPI** for the backend API
+**Backend**
+
+- **Python** with **FastAPI** for the API
 - **LangChain** (`langchain-community`, `langchain-text-splitters`) for document loading, chunking and retrieval
 - **FAISS** as the local vector store
 - **Google Gemini** (`gemini-embedding-001`) for embeddings via `langchain-google-genai`, and Gemini models for the LLM stages
 - **python-dotenv** for configuration
 
+**Frontend**
+
+- **Next.js** (App Router) with **React** and **TypeScript**
+- **Geist** font via `next/font`
+
 ## Project structure
 
 ```
 ResumeTailor/
-└── backend/
-    ├── .env                          # GOOGLE_API_KEY (not committed)
-    ├── knowledge_base/               # Candidate evidence (Markdown)
-    │   ├── experience/
-    │   │   ├── experience1.md
-    │   │   ├── experience2.md
-    │   │   ├── experience3.md
-    │   │   └── experience4.md
-    │   ├── projects/
-    │   │   ├── project1.md
-    │   │   └── project2.md
-    │   └── resume/
-    │       └── master_resume.md
-    ├── rag/
-    │   ├── vector_store.py           # Loads docs, attaches metadata, builds FAISS index
-    │   ├── retriever.py              # get_retriever()
-    │   └── evidence.py               # retrieve_evidence(job_analysis)
-    ├── vector_store/                 # Generated FAISS index (rebuild, don't edit)
-    └── ...                           # Analyzer, planner, writer, evaluator, API app
+├── backend/
+│   ├── .env                          # GOOGLE_API_KEY (not committed)
+│   ├── knowledge_base/               # Candidate evidence (Markdown)
+│   │   ├── experience/
+│   │   │   ├── ai_trusted_advisors.md
+│   │   │   ├── iassist.md
+│   │   │   ├── cognizant.md
+│   │   │   └── ai_assistant.md
+│   │   ├── projects/
+│   │   │   ├── echo.md
+│   │   │   └── immigration_rag.md
+│   │   └── resume/
+│   │       └── master_resume.md
+│   ├── rag/
+│   │   ├── vector_store.py           # Loads docs, attaches metadata, builds FAISS index
+│   │   ├── retriever.py              # get_retriever()
+│   │   └── evidence.py               # retrieve_evidence(job_analysis)
+│   ├── vector_store/                 # Generated FAISS index (rebuild, don't edit)
+│   └── ...                           # Analyzer, planner, writer, evaluator, API app
+├── frontend/                         # Next.js app
+│   ├── app/
+│   │   ├── layout.tsx                # Root layout
+│   │   └── page.tsx                  # Main page
+│   ├── public/                       # Static assets
+│   └── package.json
+└── README.md
 ```
 
-<!-- TODO: update the last line with the actual file names/paths for the analyzer, planner, writer, evaluator and FastAPI app. -->
+<!-- TODO: update the backend "..." line with the actual file names/paths for the analyzer, planner, writer, evaluator and FastAPI app. -->
 
-## Setup
+## Getting started
 
-These commands are for Windows PowerShell. On macOS/Linux, use `source .venv/bin/activate` instead of the activate script.
+### Prerequisites
 
-### 1. Create a virtual environment
+- Python 3.10 or later
+- Node.js 20 or later
+- A Google Gemini API key from [Google AI Studio](https://aistudio.google.com/)
+
+The commands below are for Windows PowerShell. On macOS/Linux, use `source .venv/bin/activate` instead of the activate script.
+
+### Backend
+
+**1. Create a virtual environment**
 
 ```powershell
 cd ResumeTailor\backend
@@ -109,7 +133,7 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-### 2. Install dependencies
+**2. Install dependencies**
 
 ```powershell
 pip install -r requirements.txt
@@ -121,7 +145,7 @@ If you don't have a `requirements.txt` yet, the core packages are:
 pip install fastapi uvicorn python-dotenv langchain-community langchain-text-splitters langchain-google-genai faiss-cpu
 ```
 
-### 3. Configure environment variables
+**3. Configure environment variables**
 
 Create `backend/.env`:
 
@@ -129,7 +153,7 @@ Create `backend/.env`:
 GOOGLE_API_KEY=your_google_api_key_here
 ```
 
-### 4. Build the vector store
+**4. Build the vector store**
 
 ```powershell
 python rag\vector_store.py
@@ -146,7 +170,7 @@ Vector store saved locally at: ...\backend\vector_store
 
 Rebuild the index any time you add, edit or remove files in `knowledge_base/`, or change how metadata is assigned.
 
-### 5. Run the API
+**5. Run the API**
 
 ```powershell
 uvicorn main:app --reload
@@ -154,7 +178,19 @@ uvicorn main:app --reload
 
 <!-- TODO: replace `main:app` with your actual module and app name if different. -->
 
-Then send a job description to the `/tailor-resume` endpoint. The interactive API docs are available at `http://127.0.0.1:8000/docs`.
+The API runs at `http://127.0.0.1:8000`, and the interactive docs are at `http://127.0.0.1:8000/docs`.
+
+### Frontend
+
+Open a **second terminal** and leave the backend running in the first one.
+
+```powershell
+cd ResumeTailor\frontend
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. The page auto-updates as you edit files in `frontend/app/`.
 
 ## Adding to the knowledge base
 
@@ -168,7 +204,7 @@ elif filename == "new_company":
 
 **New project:** add a Markdown file to `knowledge_base/projects/`. The project name is derived from the file name automatically (`my_project.md` → `My Project`).
 
-Then rebuild the vector store (step 4).
+Then rebuild the vector store (backend step 4).
 
 Write knowledge-base files as detailed, factual notes: what you built, the tools you used, the scale and the measurable outcomes. The richer and more specific these files are, the better the retrieval and the tailored bullets.
 
@@ -196,7 +232,9 @@ Run it from the `backend` directory so the `rag` package imports correctly.
 
 ## Privacy note
 
-The `knowledge_base/` folder contains personal career information. If this repository is public, consider adding `knowledge_base/` to `.gitignore` and committing a `knowledge_base_example/` folder with sample files instead. Always keep `.env` out of version control:
+The `knowledge_base/` folder contains personal career information. If this repository is public, consider adding `knowledge_base/` to `.gitignore` and committing a `knowledge_base_example/` folder with sample files instead.
+
+The frontend already has its own `.gitignore` from `create-next-app`, which covers `node_modules/`, the `.next/` build folder and local env files. For the backend, keep these out of version control:
 
 ```gitignore
 .env
@@ -211,6 +249,8 @@ __pycache__/
 - [x] FAISS vector store with Gemini embeddings
 - [x] Metadata-aware documents (`professional_experience`, `project`, `master_resume`)
 - [x] Structured evidence retrieval with duplicate filtering
+- [x] Basic Next.js frontend setup
+- [ ] Frontend UI for pasting a job description and viewing the tailored resume
 - [ ] Planner enforces section placement from `document_type` (experience → Professional Experience, project → Projects)
 - [ ] Guarantee every professional experience appears on the resume, even when retrieval scores are low
 - [ ] One-page resume constraint (bullet and section budgets enforced by the planner and checked by the evaluator)
@@ -218,4 +258,6 @@ __pycache__/
 - [ ] Explicit display names for projects (e.g. `ImmigRAG-USA` instead of `Immigration Rag`)
 - [ ] Handling for Gemini API rate limits and quotas
 
+## License
 
+<!-- TODO: add a license (e.g. MIT) if you plan to make the repository public. -->
