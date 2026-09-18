@@ -3,17 +3,29 @@
 An AI-powered resume tailoring system that reads a job description, retrieves grounded evidence from a personal knowledge base using RAG, and generates a targeted resume. Every bullet is backed by real experience or projects, so it tailors without fabricating.
 
 ## How it works
-
+ 
 ResumeTailor runs a multi-stage pipeline:
-
-```mermaid
-flowchart LR
-    JD[Job Description] --> A[Analyzer]
-    A --> R[RAG Retrieval<br/>FAISS + Gemini Embeddings]
-    R --> P[Planner]
-    P --> W[Writer]
-    W --> E[Evaluator]
-    E --> OUT[Tailored Resume]
+ 
+```
+Job Description
+      │
+      ▼
+  Analyzer ──────► requirements (category + priority)
+      │
+      ▼
+RAG Retrieval ───► FAISS + Gemini embeddings over knowledge_base/
+      │
+      ▼
+  Planner ───────► which evidence goes in which section
+      │
+      ▼
+   Writer ───────► resume content from evidence only
+      │
+      ▼
+ Evaluator ──────► checks coverage, flags gaps
+      │
+      ▼
+Tailored Resume
 ```
 
 | Stage | Responsibility |
